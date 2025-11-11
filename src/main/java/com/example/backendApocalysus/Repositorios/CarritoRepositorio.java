@@ -10,9 +10,5 @@ import java.util.Optional;
 
 public interface CarritoRepositorio extends JpaRepository<Carrito, Integer> {
 
-    // Buscar carrito activo de un usuario
-    Optional<Carrito> findByUsuarioIdAndActivoTrue(int usuarioId);
 
-    // Buscar todos los carritos de un usuario
-    List<Carrito> findByUsuarioId(int usuarioId);
 }

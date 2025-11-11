@@ -81,11 +81,7 @@ public class Carrito {
         this.usuario = usuario;
     }
 
-    public double getTotal() {
-        return detalles.stream()
-                .mapToDouble(DetalleCarrito::getSubtotal)
-                .sum();
-    }
+
 
 
 
