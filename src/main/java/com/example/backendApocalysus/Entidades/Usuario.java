@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,7 +30,11 @@ public class Usuario {
     private String correo;
     private String contrasena;
     private String telefono;
-    private LocalDateTime fechaRegistro = LocalDateTime.now();
+
+
+    @Column(updatable = false)
+    @CreationTimestamp
+    private LocalDateTime fechaRegistro;
 
     @ManyToOne
     @JoinColumn(name = "idRol")

@@ -19,10 +19,6 @@ import java.util.List;
 public class Carrito {
 
 
-    public Carrito(Usuario usuario) {
-        this();
-        this.usuario = usuario;
-    }
 
     public Carrito(){}
 
@@ -37,6 +33,8 @@ public class Carrito {
     private LocalDateTime fechaCreacion = LocalDateTime.now();
 
     private boolean activo;
+
+    private Double total;
 
     @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleCarrito> detalles;
@@ -81,9 +79,17 @@ public class Carrito {
         this.usuario = usuario;
     }
 
+    public Double getTotal() {
+        return total;
+    }
+    public void setTotal(Double total) {
+        this.total = total;
+    }
 
-
-
+    public Carrito(Usuario usuario) {
+        this();
+        this.usuario = usuario;
+    }
 
 
 }

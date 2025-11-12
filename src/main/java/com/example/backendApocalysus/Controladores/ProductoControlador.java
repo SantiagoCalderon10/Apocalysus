@@ -47,18 +47,18 @@ public class ProductoControlador {
         }
     }
 
-    // 🔹 Actualizar producto completo
-    @PutMapping("/{id}")
-    public ResponseEntity<?> actualizarProducto(
-            @PathVariable int id,
-            @Valid @RequestBody ProductoDTO productoDTO) {
-        try {
-            ProductoDTO productoActualizado = productoServicio.actualizarProducto(id, productoDTO);
-            return ResponseEntity.ok(productoActualizado);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        // 🔹 Actualizar producto completo
+        @PutMapping("/{id}")
+        public ResponseEntity<?> actualizarProducto(
+                @PathVariable int id,
+                @Valid @RequestBody ProductoDTO productoDTO) {
+            try {
+                ProductoDTO productoActualizado = productoServicio.actualizarProducto(id, productoDTO);
+                return ResponseEntity.ok(productoActualizado);
+            } catch (RuntimeException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            }
         }
-    }
 
     // 🔹 Eliminar producto
     @DeleteMapping("/{id}")
