@@ -96,5 +96,8 @@ public class Pedido {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+        if (usuario != null && !usuario.getPedidos().contains(this)) {
+            usuario.getPedidos().add(this);
+        }
     }
 }

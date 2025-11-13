@@ -65,6 +65,9 @@ public class Usuario {
 
     public void setCarrito(Carrito carrito) {
         this.carrito = carrito;
+        if (carrito != null && carrito.getUsuario() != this) {
+            carrito.setUsuario(this);
+        }
     }
 
     public String getContrasena() {
@@ -121,6 +124,13 @@ public class Usuario {
 
     public void setPedidos(List<Pedido> pedidos) {
         this.pedidos = pedidos;
+        if (pedidos != null) {
+            pedidos.forEach(pedido -> {
+                if (pedido.getUsuario() != this) {
+                    pedido.setUsuario(this);
+                }
+            });
+        }
     }
 
     public Rol getRol() {

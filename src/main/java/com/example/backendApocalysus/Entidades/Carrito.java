@@ -77,6 +77,9 @@ public class Carrito {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+        if (usuario != null && usuario.getCarrito() != this) {
+            usuario.setCarrito(this);
+        }
     }
 
     public Double getTotal() {

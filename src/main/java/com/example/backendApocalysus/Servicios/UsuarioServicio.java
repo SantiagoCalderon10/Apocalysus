@@ -13,6 +13,7 @@ import com.example.backendApocalysus.Repositorios.RolRepositorio;
 import com.example.backendApocalysus.Repositorios.UsuarioRepositorio;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,6 +30,8 @@ public class UsuarioServicio {
     @Autowired
     private CarritoRepositorio carritoRepositorio;
 
+
+
     // 🧍 Crear nuevo usuario
     @Transactional
     public UsuarioDTO registrarUsuario(UsuarioCrearDTO dto) {
@@ -44,7 +47,7 @@ public class UsuarioServicio {
         usuario.setNombre(dto.getNombre());
         usuario.setApellido(dto.getApellido());
         usuario.setCorreo(dto.getCorreo());
-        usuario.setContrasena(dto.getContrasena()); // Luego deberías cifrarla
+        usuario.setContrasena(dto.getContrasena());
         usuario.setTelefono(dto.getTelefono());
         usuario.setRol(rol);
 

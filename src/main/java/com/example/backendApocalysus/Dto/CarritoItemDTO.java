@@ -1,9 +1,6 @@
 package com.example.backendApocalysus.Dto;
 
-import com.example.backendApocalysus.Entidades.Carrito;
-import com.example.backendApocalysus.Entidades.Producto;
 
-import java.math.BigDecimal;
 
 public class CarritoItemDTO {
 

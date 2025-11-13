@@ -15,6 +15,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,9 +49,21 @@ public class CarritoServicio {
             throw new RuntimeException("La cantidad debe ser mayor que 0");
         }
 
-        // 3️⃣ Obtener o crear carrito activo
+        // Validar stock disponible
+        if (producto.getCantidadDisponible() == null || producto.getCantidadDisponible() < cantidad) {
+            throw new RuntimeException("Stock insuficiente. Disponible: " + (producto.getCantidadDisponible() != null ? producto.getCantidadDisponible() : 0));
+        }
+
+        // 3️⃣ Obtener o crear carrito activo (asegurar solo uno activo por usuario)
         Carrito carrito = carritoRepositorio.findByUsuarioAndActivoTrue(usuario)
                 .orElseGet(() -> {
+                    // Desactivar carritos anteriores si existen
+                    List<Carrito> carritosAnteriores = carritoRepositorio.findAllByUsuarioAndActivoTrue(usuario);
+                    carritosAnteriores.forEach(c -> {
+                        c.setActivo(false);
+                        carritoRepositorio.save(c);
+                    });
+
                     Carrito nuevo = new Carrito();
                     nuevo.setUsuario(usuario);
                     nuevo.setActivo(true);
@@ -62,7 +75,12 @@ public class CarritoServicio {
                 .orElse(null);
 
         if (detalle != null) {
-            detalle.setCantidad(detalle.getCantidad() + cantidad);
+            // Verificar stock para cantidad adicional
+            int cantidadTotal = detalle.getCantidad() + cantidad;
+            if (producto.getCantidadDisponible() < cantidadTotal) {
+                throw new RuntimeException("Stock insuficiente para la cantidad total. Disponible: " + producto.getCantidadDisponible());
+            }
+            detalle.setCantidad(cantidadTotal);
             detalle.setPrecioTotal(detalle.getCantidad() * detalle.getPrecioUnitario());
         } else {
             DetalleCarrito nuevoDetalle = new DetalleCarrito();
@@ -73,6 +91,12 @@ public class CarritoServicio {
             nuevoDetalle.setPrecioTotal(producto.getPrecio() * cantidad);
             detalleCarritoRepositorio.save(nuevoDetalle);
         }
+
+        // Recalcular total del carrito
+        double total = carrito.getDetalles().stream()
+                .mapToDouble(DetalleCarrito::getPrecioTotal)
+                .sum();
+        carrito.setTotal(total);
 
         return convertirADTO(carritoRepositorio.save(carrito));
     }
@@ -94,7 +118,13 @@ public class CarritoServicio {
 
         detalleCarritoRepositorio.delete(detalle);
 
-        return convertirADTO(carrito);
+        // Recalcular total del carrito después de eliminar
+        double total = carrito.getDetalles().stream()
+                .mapToDouble(DetalleCarrito::getPrecioTotal)
+                .sum();
+        carrito.setTotal(total);
+
+        return convertirADTO(carritoRepositorio.save(carrito));
     }
 
     // 🧹 Vaciar carrito
@@ -139,7 +169,8 @@ public class CarritoServicio {
                 }).collect(Collectors.toList());
 
         dto.setItems(items);
-        dto.setTotal(items.stream().mapToDouble(CarritoItemDTO::getSubtotal).sum());
+        // Usar el total calculado de la entidad en lugar de recalcular
+        dto.setTotal(carrito.getTotal() != null ? carrito.getTotal() : 0.0);
         return dto;
     }
 }
