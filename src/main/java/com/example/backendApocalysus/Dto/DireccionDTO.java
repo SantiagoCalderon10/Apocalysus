@@ -1,32 +1,22 @@
-package com.example.backendApocalysus.Entidades;
+package com.example.backendApocalysus.Dto;
+
+public class DireccionDTO {
 
 
-import jakarta.persistence.*;
-import lombok.*;
-
-
-
-@Entity
-@Table(name = "direcciones")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Direccion {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
     private String calle;
     private String ciudad;
     private String departamento;
     private String pais;
 
-    @ManyToOne
-    @JoinColumn(name = "idUsuario")
-    private Usuario usuario;
+    // Getters y Setters
+    public int getId() {
+        return id;
+    }
 
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getCalle() {
         return calle;
@@ -52,27 +42,11 @@ public class Direccion {
         this.departamento = departamento;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public String getPais() {
         return pais;
     }
 
     public void setPais(String pais) {
         this.pais = pais;
-    }
-
-    public Usuario getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
     }
 }

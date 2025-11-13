@@ -1,7 +1,5 @@
 package com.example.backendApocalysus.Dto;
 
-import com.example.backendApocalysus.Entidades.Usuario;
-import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
