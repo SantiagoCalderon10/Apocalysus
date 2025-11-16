@@ -6,12 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "pedidos")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -24,12 +25,17 @@ public class Pedido {
     @Column(unique = true)
     private String codigoPedido;
 
-    @Column(unique = true)
     private Double precioTotal;
 
     @ManyToOne
     @JoinColumn(name = "idUsuario")
     private Usuario usuario;
+
+
+
+    @Column(updatable = false)
+    @CreationTimestamp
+    private LocalDateTime fechaCreacion;
 
     @ManyToOne
     @JoinColumn(name = "idDireccion")
@@ -99,5 +105,13 @@ public class Pedido {
         if (usuario != null && !usuario.getPedidos().contains(this)) {
             usuario.getPedidos().add(this);
         }
+    }
+
+    public LocalDateTime getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(LocalDateTime fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
     }
 }

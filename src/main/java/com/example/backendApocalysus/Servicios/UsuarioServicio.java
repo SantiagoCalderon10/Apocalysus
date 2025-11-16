@@ -51,13 +51,19 @@ public class UsuarioServicio {
         usuario.setTelefono(dto.getTelefono());
         usuario.setRol(rol);
 
+        // 👉 Convertir y asignar direcciones
+
         usuarioRepositorio.save(usuario);
 
         // Crear carrito vacío
-        Carrito carrito = new Carrito();
-        carrito.setUsuario(usuario);
-        carrito.setActivo(true);
-        carritoRepositorio.save(carrito);
+
+        if(dto.getIdRol() != 1){
+            Carrito carrito = new Carrito();
+            carrito.setUsuario(usuario);
+            carrito.setActivo(true);
+            carritoRepositorio.save(carrito);
+        }
+
 
         return convertirADTO(usuario);
     }
@@ -74,6 +80,38 @@ public class UsuarioServicio {
         Usuario usuario = usuarioRepositorio.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         return convertirADTO(usuario);
+    }
+
+    // ✏️ Actualizar usuario
+    @Transactional
+    public UsuarioDTO actualizarUsuario(int id, UsuarioCrearDTO dto) {
+        Usuario usuario = usuarioRepositorio.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        // Verificar si el correo ya existe en otro usuario
+        usuarioRepositorio.findByCorreo(dto.getCorreo()).ifPresent(u -> {
+
+        });
+
+        Rol rol = rolRepositorio.findById(dto.getIdRol())
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+
+        usuario.setNombre(dto.getNombre());
+        usuario.setApellido(dto.getApellido());
+        usuario.setCorreo(dto.getCorreo());
+        usuario.setTelefono(dto.getTelefono());
+        usuario.setRol(rol);
+
+        usuarioRepositorio.save(usuario);
+        return convertirADTO(usuario);
+    }
+
+    // 🗑️ Eliminar usuario
+    @Transactional
+    public void eliminarUsuario(int id) {
+        Usuario usuario = usuarioRepositorio.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        usuarioRepositorio.delete(usuario);
     }
 
     // 🧩 Conversión entidad → DTO

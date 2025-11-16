@@ -127,6 +127,47 @@ public class CarritoServicio {
         return convertirADTO(carritoRepositorio.save(carrito));
     }
 
+    // 🔄 Actualizar cantidad de producto en carrito
+    @Transactional
+    public CarritoDTO actualizarCantidad(int idUsuario, int idProducto, int nuevaCantidad) {
+        Usuario usuario = usuarioRepositorio.findById(idUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Carrito carrito = carritoRepositorio.findByUsuarioAndActivoTrue(usuario)
+                .orElseThrow(() -> new RuntimeException("Carrito activo no encontrado"));
+
+        Producto producto = productoRepositorio.findById(idProducto)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+        if (nuevaCantidad < 0) {
+            throw new RuntimeException("La cantidad no puede ser negativa");
+        }
+
+        DetalleCarrito detalle = detalleCarritoRepositorio.findByCarritoAndProducto(carrito, producto)
+                .orElseThrow(() -> new RuntimeException("El producto no está en el carrito"));
+
+        if (nuevaCantidad == 0) {
+            // Eliminar el producto del carrito
+            detalleCarritoRepositorio.delete(detalle);
+        } else {
+            // Validar stock disponible
+            if (producto.getCantidadDisponible() < nuevaCantidad) {
+                throw new RuntimeException("Stock insuficiente. Disponible: " + producto.getCantidadDisponible());
+            }
+            detalle.setCantidad(nuevaCantidad);
+            detalle.setPrecioTotal(nuevaCantidad * detalle.getPrecioUnitario());
+            detalleCarritoRepositorio.save(detalle);
+        }
+
+        // Recalcular total del carrito
+        double total = carrito.getDetalles().stream()
+                .mapToDouble(DetalleCarrito::getPrecioTotal)
+                .sum();
+        carrito.setTotal(total);
+
+        return convertirADTO(carritoRepositorio.save(carrito));
+    }
+
     // 🧹 Vaciar carrito
     @Transactional
     public void vaciarCarrito(int idUsuario) {
@@ -174,6 +215,10 @@ public class CarritoServicio {
         return dto;
     }
 }
+
+
+
+
 
 
 

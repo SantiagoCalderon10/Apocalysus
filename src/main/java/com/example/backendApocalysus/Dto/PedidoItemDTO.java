@@ -1,15 +1,10 @@
 package com.example.backendApocalysus.Dto;
 
+public class PedidoItemDTO {
 
-
-public class CarritoItemDTO {
-
-    private int idProducto;
-
+    private String nombreProducto;
     private int cantidad;
-
     private Double precioUnitario;
-
     private Double subtotal;
 
     public int getCantidad() {
@@ -20,15 +15,13 @@ public class CarritoItemDTO {
         this.cantidad = cantidad;
     }
 
-    public int getIdProducto() {
-        return idProducto;
+    public String getNombreProducto() {
+        return nombreProducto;
     }
 
-    public void setIdProducto(int idProducto) {
-        this.idProducto = idProducto;
+    public void setNombreProducto(String nombreProducto) {
+        this.nombreProducto = nombreProducto;
     }
-
-
 
     public Double getPrecioUnitario() {
         return precioUnitario;
@@ -45,7 +38,4 @@ public class CarritoItemDTO {
     public void setSubtotal(Double subtotal) {
         this.subtotal = subtotal;
     }
-
-
 }
-
