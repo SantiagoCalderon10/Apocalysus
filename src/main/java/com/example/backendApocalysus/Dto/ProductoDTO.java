@@ -15,6 +15,16 @@ public class ProductoDTO {
 
     private Integer idCategoria;
 
+    private String nombreCategoria;
+
+    public String getNombreCategoria() {
+        return nombreCategoria;
+    }
+
+    public void setNombreCategoria(String nombreCategoria) {
+        this.nombreCategoria = nombreCategoria;
+    }
+
     public Integer getCantidadDisponible() {
         return cantidadDisponible;
     }

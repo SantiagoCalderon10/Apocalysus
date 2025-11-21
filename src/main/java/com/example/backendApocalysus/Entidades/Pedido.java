@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -45,8 +46,9 @@ public class Pedido {
     @JoinColumn(name = "idMetodoPago")
     private MetodoPago metodoPago;
 
+    @Column(nullable = false)
     @OneToMany(mappedBy = "pedido", cascade =  CascadeType.ALL)
-    private List<DetallePedido> detalles;
+    private List<DetallePedido> detalles = new ArrayList<>();
 
     public String getCodigoPedido() {
         return codigoPedido;

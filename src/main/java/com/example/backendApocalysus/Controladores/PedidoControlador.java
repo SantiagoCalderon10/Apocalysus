@@ -28,4 +28,11 @@ public class PedidoControlador {
     public ResponseEntity<List<PedidoDTO>> historial(@PathVariable int idUsuario) {
         return ResponseEntity.ok(pedidoServicio.obtenerHistorial(idUsuario));
     }
+
+    @GetMapping
+    public ResponseEntity<List<PedidoDTO>> obtenerPedidos() {
+        return ResponseEntity.ok(pedidoServicio.obtenerTodos());
+    }
+
+
 }

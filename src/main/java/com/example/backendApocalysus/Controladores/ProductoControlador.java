@@ -1,7 +1,10 @@
 package com.example.backendApocalysus.Controladores;
 
 
+import com.example.backendApocalysus.Dto.CategoriaDTO;
 import com.example.backendApocalysus.Dto.ProductoDTO;
+import com.example.backendApocalysus.Entidades.Categoria;
+import com.example.backendApocalysus.Servicios.CategoriaServicio;
 import com.example.backendApocalysus.Servicios.ProductoServicio;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,8 @@ public class ProductoControlador {
 
     @Autowired
     private ProductoServicio productoServicio;
+    @Autowired
+    private CategoriaServicio categoriaServicio;
 
     // 🔹 Crear producto
     @PostMapping

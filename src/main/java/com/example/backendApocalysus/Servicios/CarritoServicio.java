@@ -101,31 +101,36 @@ public class CarritoServicio {
         return convertirADTO(carritoRepositorio.save(carrito));
     }
 
-    // 🗑️ Eliminar un producto del carrito
-    @Transactional
-    public CarritoDTO eliminarProducto(int idUsuario, int idProducto) {
-        Usuario usuario = usuarioRepositorio.findById(idUsuario)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        Carrito carrito = carritoRepositorio.findByUsuarioAndActivoTrue(usuario)
-                .orElseThrow(() -> new RuntimeException("Carrito activo no encontrado"));
+     @Transactional
+     public CarritoDTO eliminarProducto(int idUsuario, int idProducto) {
+         Usuario usuario = usuarioRepositorio.findById(idUsuario)
+                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        Producto producto = productoRepositorio.findById(idProducto)
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+         Carrito carrito = carritoRepositorio.findByUsuarioAndActivoTrue(usuario)
+                 .orElseThrow(() -> new RuntimeException("Carrito activo no encontrado"));
 
-        DetalleCarrito detalle = detalleCarritoRepositorio.findByCarritoAndProducto(carrito, producto)
-                .orElseThrow(() -> new RuntimeException("El producto no está en el carrito"));
+         Producto producto = productoRepositorio.findById(idProducto)
+                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        detalleCarritoRepositorio.delete(detalle);
+         DetalleCarrito detalle = detalleCarritoRepositorio.findByCarritoAndProducto(carrito, producto)
+                 .orElseThrow(() -> new RuntimeException("El producto no está en el carrito"));
 
-        // Recalcular total del carrito después de eliminar
-        double total = carrito.getDetalles().stream()
-                .mapToDouble(DetalleCarrito::getPrecioTotal)
-                .sum();
-        carrito.setTotal(total);
+         // Eliminar del carrito en memoria
+         carrito.getDetalles().remove(detalle);
 
-        return convertirADTO(carritoRepositorio.save(carrito));
-    }
+         // Esto eliminará también la entidad de la BD si la relación tiene orphanRemoval=true
+         // Si no, aún puedes hacer detalleCarritoRepositorio.delete(detalle);
+
+         // Recalcular total del carrito
+         double total = carrito.getDetalles().stream()
+                 .mapToDouble(DetalleCarrito::getPrecioTotal)
+                 .sum();
+         carrito.setTotal(total);
+
+         return convertirADTO(carritoRepositorio.save(carrito));
+     }
+
 
     // 🔄 Actualizar cantidad de producto en carrito
     @Transactional
@@ -168,17 +173,30 @@ public class CarritoServicio {
         return convertirADTO(carritoRepositorio.save(carrito));
     }
 
-    // 🧹 Vaciar carrito
     @Transactional
-    public void vaciarCarrito(int idUsuario) {
+    public CarritoDTO vaciarCarrito(int idUsuario) {
+
         Usuario usuario = usuarioRepositorio.findById(idUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         Carrito carrito = carritoRepositorio.findByUsuarioAndActivoTrue(usuario)
                 .orElseThrow(() -> new RuntimeException("Carrito activo no encontrado"));
 
+        // Eliminar todos los detalles del carrito
         detalleCarritoRepositorio.deleteAll(carrito.getDetalles());
+
+        // Limpiar la lista en memoria
+        carrito.getDetalles().clear();
+
+        // Recalcular total
+        carrito.setTotal(0.0);
+
+        // Guardar carrito actualizado
+        carritoRepositorio.save(carrito);
+
+        return convertirADTO(carrito);
     }
+
 
     // 📦 Obtener carrito actual
     public CarritoDTO obtenerCarritoPorUsuario(int idUsuario) {
@@ -196,24 +214,27 @@ public class CarritoServicio {
         CarritoDTO dto = new CarritoDTO();
         dto.setIdCarrito(carrito.getIdCarrito());
         dto.setIdUsuario(carrito.getUsuario().getIdUsuario());
-        dto.setFechaCreacion(carrito.getFechaCreacion());
         dto.setActivo(carrito.isActivo());
+        dto.setFechaCreacion(carrito.getFechaCreacion());
+        dto.setTotal(carrito.getDetalles().stream()
+                .mapToDouble(DetalleCarrito::getPrecioTotal)
+                .sum());
 
-        List<CarritoItemDTO> items = carrito.getDetalles().stream()
-                .map(detalle -> {
-                    CarritoItemDTO item = new CarritoItemDTO();
-                    item.setIdProducto(detalle.getProducto().getId());
-                    item.setCantidad(detalle.getCantidad());
-                    item.setPrecioUnitario(detalle.getPrecioUnitario());
-                    item.setSubtotal(detalle.getPrecioTotal());
-                    return item;
-                }).collect(Collectors.toList());
+        List<CarritoItemDTO> items = carrito.getDetalles().stream().map(det -> {
+            CarritoItemDTO itemDTO = new CarritoItemDTO();
+            itemDTO.setIdProducto(det.getProducto().getId());
+            itemDTO.setNombre(det.getProducto().getNombre());
+            itemDTO.setImagenUrl(det.getProducto().getImagenUrl());
+            itemDTO.setCantidad(det.getCantidad());
+            itemDTO.setPrecioUnitario(det.getPrecioUnitario());
+            itemDTO.setSubtotal(det.getPrecioTotal());
+            return itemDTO;
+        }).toList();
 
         dto.setItems(items);
-        // Usar el total calculado de la entidad en lugar de recalcular
-        dto.setTotal(carrito.getTotal() != null ? carrito.getTotal() : 0.0);
         return dto;
     }
+
 }
 
 

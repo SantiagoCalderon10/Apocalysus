@@ -147,4 +147,9 @@ public class UsuarioServicio {
 
         return dto;
     }
+
+
+    public long contarUsuarios() {
+        return usuarioRepositorio.count();
+    }
 }

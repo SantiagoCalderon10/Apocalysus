@@ -1,5 +1,6 @@
 package com.example.backendApocalysus.Controladores;
 
+import com.example.backendApocalysus.Dto.DireccionDTO;
 import com.example.backendApocalysus.Dto.UsuarioCrearDTO;
 import com.example.backendApocalysus.Dto.UsuarioDTO;
 import com.example.backendApocalysus.Servicios.UsuarioServicio;
@@ -37,5 +38,7 @@ public class UsuarioControlador {
     public ResponseEntity<UsuarioDTO> obtenerPorId(@PathVariable int id) {
         return ResponseEntity.ok(usuarioServicio.obtenerPorId(id));
     }
+
+
 
 }

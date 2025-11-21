@@ -1,6 +1,5 @@
 package com.example.backendApocalysus.Servicios;
 
-
 import com.example.backendApocalysus.Dto.PedidoCreacionDTO;
 import com.example.backendApocalysus.Dto.PedidoDTO;
 import com.example.backendApocalysus.Dto.PedidoItemDTO;
@@ -17,7 +16,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class PedidoServicio {
-
 
     @Autowired
     private UsuarioRepositorio usuarioRepositorio;
@@ -71,15 +69,13 @@ public class PedidoServicio {
         pedido.setCodigoPedido("APO-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
 
         double total = 0;
-
-        // 3️⃣ Guardar pedido primero (para tener ID)
         pedido = pedidoRepositorio.save(pedido);
 
-        // 4️⃣ Pasar detalles del carrito → pedido
+        // 3️⃣ Pasar detalles del carrito al pedido
         for (DetalleCarrito detCarrito : carrito.getDetalles()) {
+
             Producto producto = detCarrito.getProducto();
 
-            // Verificar stock
             if (producto.getCantidadDisponible() < detCarrito.getCantidad()) {
                 throw new RuntimeException("Stock insuficiente para el producto: " + producto.getNombre());
             }
@@ -94,8 +90,6 @@ public class PedidoServicio {
             total += subtotal;
 
             detallePedidoRepositorio.save(detPedido);
-
-            // Agregar a la lista bidireccional
             pedido.getDetalles().add(detPedido);
 
             // Reducir stock
@@ -103,30 +97,30 @@ public class PedidoServicio {
             productoRepositorio.save(producto);
         }
 
-        // 5️⃣ Establecer total del pedido
+        // 4️⃣ Establecer total del pedido
         pedido.setPrecioTotal(total);
         pedidoRepositorio.save(pedido);
 
-        // 6️⃣ Vaciar el carrito
-        detalleCarritoRepositorio.deleteAll(carrito.getDetalles());
+        // 5️⃣ Vaciar carrito correctamente SIN causar ObjectDeletedException
+        carrito.getDetalles().clear(); // <-- Esto elimina automáticamente por orphanRemoval
+
         carrito.setTotal(0.0);
+        carrito.setActivo(true);
         carritoRepositorio.save(carrito);
 
-        carrito.setActivo(false);
-
-
-        // 7️⃣ Convertir a DTO para respuesta
         return convertirPedidoADTO(pedido);
     }
 
-    // 🔄 Conversión Pedido → PedidoDTO
     private PedidoDTO convertirPedidoADTO(Pedido pedido) {
         PedidoDTO dto = new PedidoDTO();
+
         dto.setIdPedido(pedido.getId());
         dto.setCodigoPedido(pedido.getCodigoPedido());
         dto.setPrecioTotal(pedido.getPrecioTotal());
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         dto.setFecha(pedido.getFechaCreacion().format(formatter));
+
         dto.setDireccion(pedido.getDireccion().getCalle() + " - " + pedido.getDireccion().getCiudad());
         dto.setMetodoPago(pedido.getMetodoPago().getNombre());
 
@@ -140,18 +134,34 @@ public class PedidoServicio {
         }).collect(Collectors.toList());
 
         dto.setItems(items);
-
         return dto;
     }
 
-    // 📦 Obtener historial del usuario
-    public List<PedidoDTO> obtenerHistorial(int idUsuario) {
 
+
+    public List<PedidoDTO> obtenerTodos() {
+        List<Pedido> pedidos = pedidoRepositorio.findAll();
+        return pedidos.stream()
+                .map(this::convertirPedidoADTO)
+                .toList();
+    }
+
+    public List<PedidoDTO> obtenerHistorial(int idUsuario) {
         Usuario usuario = usuarioRepositorio.findById(idUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
         return pedidoRepositorio.findByUsuario(usuario)
                 .stream()
                 .map(this::convertirPedidoADTO)
                 .collect(Collectors.toList());
+    }
+
+
+    public long contarProductos() {
+        return productoRepositorio.count();
+    }
+
+    public long contarPedidos() {
+        return pedidoRepositorio.count();
     }
 }

@@ -173,7 +173,12 @@ public class ProductoServicio {
         dto.setCantidadDisponible(producto.getCantidadDisponible());
         dto.setImagenUrl(producto.getImagenUrl());
         dto.setIdCategoria(producto.getCategoria().getId());
+        dto.setNombreCategoria(producto.getCategoria().getNombre());    
         return dto;
     }
 
+
+    public long contarProductos() {
+        return productoRepositorio.count();
+    }
 }
