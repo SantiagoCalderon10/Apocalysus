@@ -13,7 +13,6 @@ public class CategoriaControlador {
     @Autowired
     private CategoriaServicio categoriaServicio;
 
-    // CREATE
     @PostMapping
     public CategoriaDTO crearCategoria(@RequestBody CategoriaDTO categoriaDTO) {
         return categoriaServicio.crearCategoria(categoriaDTO);
