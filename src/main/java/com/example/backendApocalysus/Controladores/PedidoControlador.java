@@ -2,6 +2,8 @@ package com.example.backendApocalysus.Controladores;
 
 import com.example.backendApocalysus.Dto.PedidoCreacionDTO;
 import com.example.backendApocalysus.Dto.PedidoDTO;
+import com.example.backendApocalysus.Entidades.MetodoPago;
+import com.example.backendApocalysus.Entidades.MetodosPagoDTO;
 import com.example.backendApocalysus.Servicios.PedidoServicio;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,12 @@ public class PedidoControlador {
     @GetMapping
     public ResponseEntity<List<PedidoDTO>> obtenerPedidos() {
         return ResponseEntity.ok(pedidoServicio.obtenerTodos());
+    }
+
+
+    @GetMapping("/metodospago")
+    public ResponseEntity<List<MetodosPagoDTO>> obtenerMetodosPago(){
+        return ResponseEntity.ok(pedidoServicio.obtenerMetodosPago());
     }
 
 

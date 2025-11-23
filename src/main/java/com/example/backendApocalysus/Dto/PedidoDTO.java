@@ -5,12 +5,21 @@ import java.util.List;
 public class PedidoDTO {
 
     private int idPedido;
+    private String nombreUsuario;
     private String codigoPedido;
     private Double precioTotal;
     private String fecha;
     private String direccion;
     private String metodoPago;
     private List<PedidoItemDTO> items;
+
+    public String getNombreUsuario() {
+        return nombreUsuario;
+    }
+
+    public void setNombreUsuario(String nombreUsuario) {
+        this.nombreUsuario = nombreUsuario;
+    }
 
     public String getCodigoPedido() {
         return codigoPedido;

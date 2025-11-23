@@ -1,0 +1,33 @@
+package com.example.backendApocalysus.Entidades;
+
+public class MetodosPagoDTO {
+
+    private int idMetodoPago;
+
+    private String nombre;
+
+
+    public MetodosPagoDTO(){
+
+    }
+
+    public MetodosPagoDTO(int id, String nombre){
+        this.idMetodoPago = id;
+        this.nombre = nombre;
+    }
+    public int getIdMetodoPago() {
+        return idMetodoPago;
+    }
+
+    public void setIdMetodoPago(int idMetodoPago) {
+        this.idMetodoPago = idMetodoPago;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+}

@@ -8,6 +8,15 @@ public class DireccionDTO {
     private String ciudad;
     private String departamento;
     private String pais;
+    private int idUsuario;
+
+    public int getIdUsuario(){
+        return idUsuario;
+    }
+
+    public void setIdUsuario(int idUsuario) {
+        this.idUsuario = idUsuario;
+    }
 
     // Getters y Setters
     public int getId() {

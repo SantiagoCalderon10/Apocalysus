@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -113,11 +114,10 @@ public class PedidoServicio {
 
     private PedidoDTO convertirPedidoADTO(Pedido pedido) {
         PedidoDTO dto = new PedidoDTO();
-
         dto.setIdPedido(pedido.getId());
         dto.setCodigoPedido(pedido.getCodigoPedido());
         dto.setPrecioTotal(pedido.getPrecioTotal());
-
+        dto.setNombreUsuario(pedido.getUsuario().getNombre() + "");
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         dto.setFecha(pedido.getFechaCreacion().format(formatter));
 
@@ -126,6 +126,7 @@ public class PedidoServicio {
 
         List<PedidoItemDTO> items = pedido.getDetalles().stream().map(det -> {
             PedidoItemDTO i = new PedidoItemDTO();
+            i.setImagenUrl(det.getProducto().getImagenUrl());
             i.setNombreProducto(det.getProducto().getNombre());
             i.setCantidad(det.getCantidad());
             i.setPrecioUnitario(det.getPrecioUnitario());
@@ -157,11 +158,22 @@ public class PedidoServicio {
     }
 
 
-    public long contarProductos() {
-        return productoRepositorio.count();
-    }
 
     public long contarPedidos() {
         return pedidoRepositorio.count();
     }
+
+
+
+    public List<MetodosPagoDTO> obtenerMetodosPago() {
+        return metodoPagoRepositorio.findAll()
+                .stream()
+                .map(mp -> new MetodosPagoDTO(mp.getId(), mp.getNombre()))
+                .toList();
+    }
+
+
+
+
+
 }

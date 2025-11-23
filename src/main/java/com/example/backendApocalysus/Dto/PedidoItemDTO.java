@@ -6,6 +6,16 @@ public class PedidoItemDTO {
     private int cantidad;
     private Double precioUnitario;
     private Double subtotal;
+    private String imagenUrl;
+
+
+    public String getImagenUrl() {
+        return imagenUrl;
+    }
+
+    public void setImagenUrl(String imagenUrl) {
+        this.imagenUrl = imagenUrl;
+    }
 
     public int getCantidad() {
         return cantidad;

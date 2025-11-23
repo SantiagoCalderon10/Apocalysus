@@ -6,6 +6,7 @@ import com.example.backendApocalysus.Dto.UsuarioDTO;
 import com.example.backendApocalysus.Servicios.UsuarioServicio;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +16,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioControlador {
-
 
 
     @Autowired
@@ -39,6 +39,28 @@ public class UsuarioControlador {
         return ResponseEntity.ok(usuarioServicio.obtenerPorId(id));
     }
 
+    @GetMapping("/direcciones/{id}")
+    public ResponseEntity<List<DireccionDTO>> obtenerDireccionesPorUsuario(@PathVariable int id) {
+        List<DireccionDTO> direcciones = usuarioServicio.obtenerDireccionesDTOporUsuario(id);
 
+        return ResponseEntity.ok(direcciones);
 
+    }
+
+    @PostMapping("/agregardireccion/{idUsuario}")
+    public ResponseEntity<List<DireccionDTO>> agregarDireccion(
+            @PathVariable int idUsuario,
+            @RequestBody DireccionDTO dto) {
+
+        try {
+            usuarioServicio.agregarDireccion(dto, idUsuario);
+            List<DireccionDTO> direcciones = usuarioServicio.obtenerDireccionesDTOporUsuario(idUsuario);
+            return ResponseEntity.ok(direcciones);
+
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(null);
+        }
+    }
 }

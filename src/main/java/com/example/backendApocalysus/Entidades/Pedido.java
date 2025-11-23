@@ -26,6 +26,8 @@ public class Pedido {
     @Column(unique = true)
     private String codigoPedido;
 
+
+    @Column(unique = false)
     private Double precioTotal;
 
     @ManyToOne

@@ -4,11 +4,9 @@ package com.example.backendApocalysus.Servicios;
 import com.example.backendApocalysus.Dto.DireccionDTO;
 import com.example.backendApocalysus.Dto.UsuarioCrearDTO;
 import com.example.backendApocalysus.Dto.UsuarioDTO;
-import com.example.backendApocalysus.Entidades.Carrito;
-import com.example.backendApocalysus.Entidades.Pedido;
-import com.example.backendApocalysus.Entidades.Rol;
-import com.example.backendApocalysus.Entidades.Usuario;
+import com.example.backendApocalysus.Entidades.*;
 import com.example.backendApocalysus.Repositorios.CarritoRepositorio;
+import com.example.backendApocalysus.Repositorios.DireccionRepositorio;
 import com.example.backendApocalysus.Repositorios.RolRepositorio;
 import com.example.backendApocalysus.Repositorios.UsuarioRepositorio;
 import jakarta.transaction.Transactional;
@@ -16,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,7 +28,8 @@ public class UsuarioServicio {
 
     @Autowired
     private CarritoRepositorio carritoRepositorio;
-
+    @Autowired
+    private DireccionRepositorio direccionRepositorio;
 
 
     // 🧍 Crear nuevo usuario
@@ -61,6 +61,7 @@ public class UsuarioServicio {
             Carrito carrito = new Carrito();
             carrito.setUsuario(usuario);
             carrito.setActivo(true);
+            carrito.setTotal(0.0);
             carritoRepositorio.save(carrito);
         }
 
@@ -152,4 +153,56 @@ public class UsuarioServicio {
     public long contarUsuarios() {
         return usuarioRepositorio.count();
     }
+
+    private DireccionDTO convertirADTO(Direccion direccion) {
+        DireccionDTO dto = new DireccionDTO();
+        dto.setId(direccion.getId());
+        dto.setCalle(direccion.getCalle());
+        dto.setCiudad(direccion.getCiudad());
+        dto.setDepartamento(direccion.getDepartamento());
+        dto.setPais(direccion.getPais());
+        return dto;
+    }
+
+    private List<DireccionDTO> convertirListaADTO(List<Direccion> direcciones) {
+        List<DireccionDTO> dtos = new ArrayList<>();
+        for (Direccion direccion : direcciones) {
+            dtos.add(convertirADTO(direccion));
+        }
+        return dtos;
+    }
+    public List<DireccionDTO> obtenerDireccionesDTOporUsuario(int idUsuario) {
+
+        Usuario usuario = usuarioRepositorio.findById(idUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        List<Direccion> direcciones = direccionRepositorio.findByUsuario(usuario);
+
+        List<DireccionDTO> dtos = new ArrayList<>();
+
+        for (Direccion direccion : direcciones) {
+            dtos.add(convertirADTO(direccion));
+        }
+
+        return dtos;
+    }
+
+    public void agregarDireccion(DireccionDTO dto, int idUsuario){
+
+        Usuario usuario = usuarioRepositorio.findById(idUsuario)
+                .orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+
+        Direccion direccion = new Direccion();
+
+        direccion.setUsuario(usuario);
+        direccion.setCalle(dto.getCalle());
+        direccion.setCiudad(dto.getCiudad());
+        direccion.setDepartamento(dto.getDepartamento());
+        direccion.setPais(dto.getPais());
+
+        direccionRepositorio.save(direccion);
+
+    }
+
+
 }
