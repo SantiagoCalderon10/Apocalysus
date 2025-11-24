@@ -3,6 +3,7 @@ package com.example.backendApocalysus.Controladores;
 import com.example.backendApocalysus.Dto.DireccionDTO;
 import com.example.backendApocalysus.Dto.UsuarioCrearDTO;
 import com.example.backendApocalysus.Dto.UsuarioDTO;
+import com.example.backendApocalysus.Seguridad.SecurityUtils;
 import com.example.backendApocalysus.Servicios.UsuarioServicio;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,46 +22,34 @@ public class UsuarioControlador {
     @Autowired
     private UsuarioServicio usuarioServicio;
 
-    // Crear nuevo usuario
     @PostMapping("/registrar")
     public ResponseEntity<UsuarioDTO> registrar(@Valid @RequestBody UsuarioCrearDTO dto) {
         return ResponseEntity.ok(usuarioServicio.registrarUsuario(dto));
     }
 
-    // Obtener todos los usuarios
     @GetMapping
     public ResponseEntity<List<UsuarioDTO>> listar() {
         return ResponseEntity.ok(usuarioServicio.obtenerTodos());
     }
 
-    // Obtener usuario por ID
     @GetMapping("/{id}")
     public ResponseEntity<UsuarioDTO> obtenerPorId(@PathVariable int id) {
         return ResponseEntity.ok(usuarioServicio.obtenerPorId(id));
     }
 
-    @GetMapping("/direcciones/{id}")
-    public ResponseEntity<List<DireccionDTO>> obtenerDireccionesPorUsuario(@PathVariable int id) {
-        List<DireccionDTO> direcciones = usuarioServicio.obtenerDireccionesDTOporUsuario(id);
-
-        return ResponseEntity.ok(direcciones);
-
+    @GetMapping("/direcciones")
+    public ResponseEntity<List<DireccionDTO>> obtenerDireccionesPorUsuario() {
+        int id = SecurityUtils.getUserId();
+        return ResponseEntity.ok(usuarioServicio.obtenerDireccionesDTOporUsuario(id));
     }
 
-    @PostMapping("/agregardireccion/{idUsuario}")
-    public ResponseEntity<List<DireccionDTO>> agregarDireccion(
-            @PathVariable int idUsuario,
-            @RequestBody DireccionDTO dto) {
+    @PostMapping("/direcciones")
+    public ResponseEntity<List<DireccionDTO>> agregarDireccion(@RequestBody DireccionDTO dto) {
+        int idUsuario = SecurityUtils.getUserId();
 
-        try {
-            usuarioServicio.agregarDireccion(dto, idUsuario);
-            List<DireccionDTO> direcciones = usuarioServicio.obtenerDireccionesDTOporUsuario(idUsuario);
-            return ResponseEntity.ok(direcciones);
+        usuarioServicio.agregarDireccion(dto, idUsuario);
+        List<DireccionDTO> direcciones = usuarioServicio.obtenerDireccionesDTOporUsuario(idUsuario);
 
-        } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(null);
-        }
+        return ResponseEntity.ok(direcciones);
     }
 }

@@ -2,6 +2,7 @@ package com.example.backendApocalysus.Servicios;
 
 
 import com.example.backendApocalysus.Dto.DireccionDTO;
+import com.example.backendApocalysus.Dto.RegisterRequest;
 import com.example.backendApocalysus.Dto.UsuarioCrearDTO;
 import com.example.backendApocalysus.Dto.UsuarioDTO;
 import com.example.backendApocalysus.Entidades.*;
@@ -12,6 +13,8 @@ import com.example.backendApocalysus.Repositorios.UsuarioRepositorio;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,6 +22,10 @@ import java.util.List;
 
 @Service
 public class UsuarioServicio {
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     @Autowired
     private UsuarioRepositorio usuarioRepositorio;
@@ -69,6 +76,9 @@ public class UsuarioServicio {
         return convertirADTO(usuario);
     }
 
+    public boolean existePorCorreo(String correo) {
+        return usuarioRepositorio.findByCorreo(correo).isPresent();
+    }
     // 🔍 Obtener todos los usuarios
     public List<UsuarioDTO> obtenerTodos() {
         return usuarioRepositorio.findAll().stream()
@@ -204,5 +214,30 @@ public class UsuarioServicio {
 
     }
 
+    @Transactional
+    public void registrarUsuarioDesdeAuth(RegisterRequest registerRequest) {
+
+        // Buscar rol por defecto (Cliente = 2)
+        Rol rol = rolRepositorio.findById(2)
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+
+        // Crear usuario
+        Usuario usuario = new Usuario();
+        usuario.setNombre(registerRequest.getNombre());
+        usuario.setApellido(registerRequest.getApellido());
+        usuario.setCorreo(registerRequest.getEmail());
+        usuario.setContrasena(passwordEncoder.encode(registerRequest.getContrasena()));
+        usuario.setTelefono(String.valueOf(registerRequest.getTelefono()));
+        usuario.setRol(rol);
+
+        usuarioRepositorio.save(usuario);
+
+        // Crear carrito vacío para el usuario
+        Carrito carrito = new Carrito();
+        carrito.setUsuario(usuario);
+        carrito.setActivo(true);
+        carrito.setTotal(0.0);
+        carritoRepositorio.save(carrito);
+    }
 
 }

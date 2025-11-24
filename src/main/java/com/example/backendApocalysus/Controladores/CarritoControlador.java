@@ -2,12 +2,15 @@ package com.example.backendApocalysus.Controladores;
 
 
 import com.example.backendApocalysus.Dto.CarritoDTO;
+import com.example.backendApocalysus.Seguridad.SecurityUtils;
+import com.example.backendApocalysus.Seguridad.UserDetailsImpl;
 import com.example.backendApocalysus.Servicios.CarritoServicio;
 import com.example.backendApocalysus.Servicios.ProductoServicio;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,74 +24,64 @@ public class CarritoControlador {
     @Autowired
     private ProductoServicio productoServicio;
 
-
-    // ✅ Obtener el carrito activo del usuario
-    @GetMapping("/{idUsuario}")
-    public ResponseEntity<?> obtenerCarrito(@PathVariable @Min(1) int idUsuario) {
+    @GetMapping
+    public ResponseEntity<?> obtenerCarrito() {
+        int idUsuario = SecurityUtils.getUserId();
         try {
             CarritoDTO carrito = carritoServicio.obtenerCarritoPorUsuario(idUsuario);
             return ResponseEntity.ok(carrito);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new CarritoDTO()); // DTO vacío
+            return ResponseEntity.ok(new CarritoDTO());
         }
     }
 
-    // ✅ Agregar producto al carrito
-    @PostMapping("/{idUsuario}/agregar")
+    @PostMapping("/agregar")
     public ResponseEntity<?> agregarProducto(
-            @PathVariable @Min(1) int idUsuario,
-            @RequestParam @Min(1) int idProducto,
-            @RequestParam @Min(1) @Max(100) int cantidad
+            @RequestParam int idProducto,
+            @RequestParam int cantidad
     ) {
+        int idUsuario = SecurityUtils.getUserId();
         try {
             CarritoDTO carritoActualizado = carritoServicio.agregarProducto(idUsuario, idProducto, cantidad);
             return ResponseEntity.ok(carritoActualizado);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new CarritoDTO()); // DTO vacío
+            return ResponseEntity.ok(new CarritoDTO());
         }
     }
 
-    // ✅ Actualizar cantidad de producto en carrito
-    @PutMapping("/{idUsuario}/actualizar")
+    @PutMapping("/actualizar")
     public ResponseEntity<?> actualizarCantidad(
-            @PathVariable @Min(1) int idUsuario,
-            @RequestParam @Min(1) int idProducto,
-            @RequestParam @Min(0) @Max(100) int cantidad
+            @RequestParam int idProducto,
+            @RequestParam int cantidad
     ) {
+        int idUsuario = SecurityUtils.getUserId();
         try {
             CarritoDTO carritoActualizado = carritoServicio.actualizarCantidad(idUsuario, idProducto, cantidad);
             return ResponseEntity.ok(carritoActualizado);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new CarritoDTO()); // DTO vacío
+            return ResponseEntity.ok(new CarritoDTO());
         }
     }
 
-    // ✅ Eliminar producto del carrito
-    @DeleteMapping("/{idUsuario}/eliminar")
-    public ResponseEntity<?> eliminarProducto(
-            @PathVariable @Min(1) int idUsuario,
-            @RequestParam @Min(1) int idProducto
-    ) {
+    @DeleteMapping("/eliminar")
+    public ResponseEntity<?> eliminarProducto(@RequestParam int idProducto) {
+        int idUsuario = SecurityUtils.getUserId();
         try {
             CarritoDTO carritoActualizado = carritoServicio.eliminarProducto(idUsuario, idProducto);
             return ResponseEntity.ok(carritoActualizado);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(new CarritoDTO()); // DTO vacío
+            return ResponseEntity.ok(new CarritoDTO());
         }
     }
 
-    // ✅ Vaciar todo el carrito
-    @DeleteMapping("/{idUsuario}/vaciar")
-    public ResponseEntity<?> vaciarCarrito(@PathVariable @Min(1) int idUsuario) {
+    @DeleteMapping("/vaciar")
+    public ResponseEntity<?> vaciarCarrito() {
+        int idUsuario = SecurityUtils.getUserId();
         try {
             carritoServicio.vaciarCarrito(idUsuario);
             return ResponseEntity.ok("Carrito vaciado correctamente");
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body("Error al vaciar carrito: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Error al vaciar: " + e.getMessage());
         }
     }
-
-
-
-
 }
