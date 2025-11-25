@@ -8,6 +8,12 @@ import com.example.backendApocalysus.Entidades.Usuario;
 import com.example.backendApocalysus.Seguridad.JwtUtils;
 import com.example.backendApocalysus.Seguridad.UserDetailsImpl;
 import com.example.backendApocalysus.Servicios.UsuarioServicio;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +26,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Autenticación", description = "Endpoints para registro, login y verificación de usuarios")
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/auth")
@@ -36,6 +43,16 @@ public class AuthController {
     // ---------------------
     // LOGIN
     // ---------------------
+    @Operation(
+            summary = "Iniciar sesión",
+            description = "Autentica un usuario con email y contraseña, retorna un token JWT"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Login exitoso",
+                    content = @Content(schema = @Schema(implementation = AuthResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Credenciales inválidas",
+                    content = @Content)
+    })
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
@@ -75,6 +92,14 @@ public class AuthController {
     // ---------------------
     // REGISTRO
     // ---------------------
+    @Operation(
+            summary = "Registrar usuario",
+            description = "Crea una nueva cuenta de usuario en el sistema"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usuario registrado exitosamente"),
+            @ApiResponse(responseCode = "400", description = "Email ya registrado o datos inválidos")
+    })
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
@@ -100,6 +125,10 @@ public class AuthController {
     // ---------------------
     // VERIFICAR TOKEN
     // ---------------------
+    @Operation(
+            summary = "Verificar token",
+            description = "Valida si un token JWT es válido y no ha expirado"
+    )
     @GetMapping("/verify")
     public ResponseEntity<?> verifyToken(@RequestHeader("Authorization") String token) {
         try {

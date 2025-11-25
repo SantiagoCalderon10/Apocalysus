@@ -1,4 +1,4 @@
-package com.example.backendApocalysus.Entidades;
+package com.example.backendApocalysus.Dto;
 
 public class MetodosPagoDTO {
 
