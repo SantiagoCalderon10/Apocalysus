@@ -5,8 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 public class PedidoCreacionDTO {
 
-    @NotNull(message = "El ID del usuario es obligatorio")
-    @Min(value = 1, message = "El ID del usuario debe ser mayor a 0")
+
     private int idUsuario;
 
     @NotNull(message = "El ID de la dirección es obligatorio")

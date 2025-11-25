@@ -76,6 +76,14 @@ public class UsuarioServicio {
         return convertirADTO(usuario);
     }
 
+    public UsuarioDTO obtenerUsuarioPorEmail(String email){
+       UsuarioDTO usuario = convertirADTO(usuarioRepositorio.findByCorreo(email)
+               .orElseThrow(() -> new UsernameNotFoundException("No encontrado"))
+);
+
+    return usuario;
+    }
+
     public boolean existePorCorreo(String correo) {
         return usuarioRepositorio.findByCorreo(correo).isPresent();
     }

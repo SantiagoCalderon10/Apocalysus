@@ -4,11 +4,13 @@ import com.example.backendApocalysus.Dto.DireccionDTO;
 import com.example.backendApocalysus.Dto.UsuarioCrearDTO;
 import com.example.backendApocalysus.Dto.UsuarioDTO;
 import com.example.backendApocalysus.Seguridad.SecurityUtils;
+import com.example.backendApocalysus.Seguridad.UserDetailsImpl;
 import com.example.backendApocalysus.Servicios.UsuarioServicio;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,7 +29,7 @@ public class UsuarioControlador {
         return ResponseEntity.ok(usuarioServicio.registrarUsuario(dto));
     }
 
-    @GetMapping
+    @GetMapping("/listar")
     public ResponseEntity<List<UsuarioDTO>> listar() {
         return ResponseEntity.ok(usuarioServicio.obtenerTodos());
     }
@@ -42,6 +44,14 @@ public class UsuarioControlador {
         int id = SecurityUtils.getUserId();
         return ResponseEntity.ok(usuarioServicio.obtenerDireccionesDTOporUsuario(id));
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<UsuarioDTO> getCurrentUser(Authentication authentication) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        UsuarioDTO usuarioDTO = usuarioServicio.obtenerUsuarioPorEmail(userDetails.getUsername());
+        return ResponseEntity.ok(usuarioDTO);
+    }
+
 
     @PostMapping("/direcciones")
     public ResponseEntity<List<DireccionDTO>> agregarDireccion(@RequestBody DireccionDTO dto) {

@@ -30,44 +30,53 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-
-                .csrf(csrf -> csrf.disable()) // Desactiva CSRF para APIs
+                .csrf(csrf -> csrf.disable())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // <-- PERMITIR PRE-FLIGHT
+                        // 🔓 PRE-FLIGHT CORS
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         // 🔓 RUTAS PÚBLICAS
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll()
 
-                        // 🛒 SOLO USUARIO AUTENTICADO (CLIENTE O ADMIN)
-                        .requestMatchers("/api/carrito/**").hasAnyAuthority("ROLE_CLIENTE", "ROLE_ADMINISTRADOR")
-                        .requestMatchers("/api/pedidos/crear").hasAnyRole("CLIENTE", "ADMINISTRADOR")
-                        .requestMatchers("/api/pedidos/historial/**").hasAnyRole("CLIENTE", "ADMINISTRADOR")
-                        .requestMatchers("/api/pedidos/metodospago").hasAnyRole("CLIENTE", "ADMINISTRADOR")
-                        .requestMatchers("/api/usuarios/direcciones/**").hasAnyRole("CLIENTE", "ADMINISTRADOR")
-                        .requestMatchers("/api/usuarios/agregardireccion/**").hasAnyRole("CLIENTE", "ADMINISTRADOR")
+                        // 🛒 CARRITO - REQUIERE AUTENTICACIÓN (cualquier usuario logueado)
+                        .requestMatchers("/api/carrito/**").hasAnyRole("CLIENTE", "ADMINISTRADOR")
 
-                        // 👑 SOLO ADMINISTRADOR
+                        // 📦 PEDIDOS
+                        .requestMatchers(HttpMethod.POST, "/api/pedidos/nuevo").hasAnyRole("CLIENTE", "ADMINISTRADOR")
+                        .requestMatchers("/api/pedidos/historial").hasAnyRole("CLIENTE", "ADMINISTRADOR")
+                        .requestMatchers("/api/pedidos/metodospago").hasAnyRole("CLIENTE", "ADMINISTRADOR")
+                        .requestMatchers("/api/pedidos").hasRole("ADMINISTRADOR") // ver TODOS los pedidos
+
+                        // 👤 USUARIOS
+                        .requestMatchers("/api/usuarios/me").hasAnyRole("CLIENTE", "ADMINISTRADOR")
+                        .requestMatchers("/api/usuarios/direcciones/**").hasAnyRole("CLIENTE", "ADMINISTRADOR")
+                        .requestMatchers("/api/usuarios/listar").hasRole("ADMINISTRADOR")
+
+                        // 📝 PRODUCTOS (ADMIN)
                         .requestMatchers(HttpMethod.POST, "/api/productos/**").hasRole("ADMINISTRADOR")
                         .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.PATCH, "/api/productos/**").hasRole("ADMINISTRADOR")
                         .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasRole("ADMINISTRADOR")
 
+                        // 🏷️ CATEGORÍAS (ADMIN)
                         .requestMatchers(HttpMethod.POST, "/api/categorias/**").hasRole("ADMINISTRADOR")
                         .requestMatchers(HttpMethod.PUT, "/api/categorias/**").hasRole("ADMINISTRADOR")
                         .requestMatchers(HttpMethod.DELETE, "/api/categorias/**").hasRole("ADMINISTRADOR")
 
+                        // 👑 ADMIN
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRADOR")
-                        .requestMatchers("/api/pedidos").hasRole("ADMINISTRADOR") // ver todos los pedidos
 
-                        // 🔐 CUALQUIER OTRA RUTA REQUIERE AUTENTICACIÓN
+                        // 🔐 TODO LO DEMÁS REQUIERE AUTENTICACIÓN
                         .anyRequest().authenticated()
                 );
 
-        // Filtro JWT
+        // Agregar filtro JWT
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

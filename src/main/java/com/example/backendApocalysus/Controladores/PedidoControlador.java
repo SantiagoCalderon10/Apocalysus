@@ -8,7 +8,9 @@ import com.example.backendApocalysus.Seguridad.SecurityUtils;
 import com.example.backendApocalysus.Servicios.PedidoServicio;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,10 +22,16 @@ public class PedidoControlador {
     @Autowired
     private PedidoServicio pedidoServicio;
 
-    @PostMapping("/crear")
+    @PostMapping("/nuevo")
     public ResponseEntity<?> crearPedido(@Valid @RequestBody PedidoCreacionDTO dto) {
-        int idUsuario = SecurityUtils.getUserId();
-        dto.setIdUsuario(idUsuario);
+
+        System.out.println("🎯 LLEGÓ AL CONTROLADOR");
+
+        int idUsuario = SecurityUtils.getUserId();  // ⬅️ ESTO se ejecuta DESPUÉS de validar
+
+        System.out.println("👤 ID Usuario: " + idUsuario);
+
+        dto.setIdUsuario(idUsuario);  // ⬅️ Pero el @Valid ya validó ANTES
 
         return ResponseEntity.ok(pedidoServicio.crearPedido(dto));
     }

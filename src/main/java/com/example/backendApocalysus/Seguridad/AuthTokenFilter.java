@@ -30,25 +30,43 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        String token = parseJwt(request);
+        System.out.println("🔍 ========== FILTRO JWT ==========");
+        System.out.println("📍 URL: " + request.getMethod() + " " + request.getRequestURI());
 
-        if (token != null && jwtUtils.validateJwtToken(token)) {
+        try {
+            String token = parseJwt(request);
+            System.out.println("🔑 Token extraído: " + (token != null ? "SÍ" : "NO"));
 
-            String username = jwtUtils.getUserNameFromJwtToken(token);
+            if (token != null && jwtUtils.validateJwtToken(token)) {
+                System.out.println("✅ Token válido");
 
-            var userDetails = userDetailsService.loadUserByUsername(username);
+                String username = jwtUtils.getUserNameFromJwtToken(token);
+                System.out.println("👤 Username del token: " + username);
 
-            var auth = new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities()
-            );
+                UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
+                System.out.println("👤 UserDetails cargado - ID: " + userDetails.getId());
+                System.out.println("🔐 Authorities: " + userDetails.getAuthorities());
 
-            auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
 
-            SecurityContextHolder.getContext().setAuthentication(auth);
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(auth);
+
+                System.out.println("✅ Authentication guardado correctamente");
+                System.out.println("✅ Principal: " + SecurityContextHolder.getContext().getAuthentication().getPrincipal().getClass().getName());
+            } else {
+                System.out.println("⚠️ Token inválido o no presente");
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Error en AuthTokenFilter: " + e.getMessage());
+            e.printStackTrace();
         }
 
+        System.out.println("=================================");
         filterChain.doFilter(request, response);
     }
 
