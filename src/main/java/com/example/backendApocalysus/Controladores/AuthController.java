@@ -103,7 +103,7 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
-            // Verificar si el correo ya existe
+
             if (usuarioServicio.existePorCorreo(registerRequest.getEmail())) {
                 return ResponseEntity
                         .badRequest()
